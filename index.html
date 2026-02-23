@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev News Aggregator</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📰</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>📰 Dev News Aggregator</h1>
+        <p>Latest updates in .NET, AI & Development</p>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search articles..." />
+        </div>
+    </header>
+
+    <main>
+        <div class="filters">
+            <div class="filter-group">
+                <label>Category:</label>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-category="all">All</button>
+                    <button class="filter-btn" data-category="dotnet">.NET</button>
+                    <button class="filter-btn" data-category="ai">AI</button>
+                    <button class="filter-btn" data-category="dev">Development</button>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <label for="source-filter">Source:</label>
+                <select id="source-filter" class="source-select">
+                    <option value="all">All Sources</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="date-filter">Time:</label>
+                <select id="date-filter" class="source-select">
+                    <option value="1">Last 24 hours</option>
+                    <option value="3">Last 3 days</option>
+                    <option value="7" selected>Last week</option>
+                    <option value="14">Last 2 weeks</option>
+                    <option value="30">Last month</option>
+                    <option value="365">Last year</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="news-container" class="news-grid">
+            <div class="loading">Loading news...</div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
