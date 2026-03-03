@@ -1,3 +1,5 @@
+import API_BASE_URL from './config.js';
+
 // News sources configuration
 const NEWS_SOURCES = [
     // {
