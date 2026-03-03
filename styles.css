@@ -418,16 +418,24 @@ main {
         border-radius: 12px;
         cursor: pointer;
         margin-bottom: 1rem;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+    
+    .mobile-filter-toggle:active {
+        background: var(--bg-primary);
     }
     
     .mobile-filter-toggle span {
         font-weight: 600;
         color: var(--text-primary);
+        pointer-events: none;
     }
     
     .mobile-filter-toggle-icon {
         font-size: 1.2rem;
         transition: transform 0.3s;
+        pointer-events: none;
     }
     
     .sidebar.collapsed .filter-section {
@@ -435,7 +443,7 @@ main {
     }
     
     .sidebar.collapsed .mobile-filter-toggle-icon {
-        transform: rotate(180deg);
+        transform: rotate(-90deg);
     }
     
     .news-grid {

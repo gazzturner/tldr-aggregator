@@ -529,13 +529,27 @@ function initMobileFilters() {
     const toggle = document.getElementById('mobile-filter-toggle');
     const sidebar = document.querySelector('.sidebar');
     
+    if (!toggle || !sidebar) {
+        console.error('Mobile filter elements not found');
+        return;
+    }
+    
     // Start collapsed on mobile
     if (window.innerWidth <= 768) {
         sidebar.classList.add('collapsed');
     }
     
-    toggle.addEventListener('click', () => {
+    toggle.addEventListener('click', (e) => {
+        e.preventDefault();
         sidebar.classList.toggle('collapsed');
+        console.log('Filter toggled, collapsed:', sidebar.classList.contains('collapsed'));
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('collapsed');
+        }
     });
 }
 
