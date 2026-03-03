@@ -384,6 +384,8 @@ function categorizeContent(text) {
 // Fetch news from all sources
 async function fetchNews() {
     const allNews = [];
+    const header = document.querySelector('header');
+    header.classList.add('loading');
     
     for (const source of NEWS_SOURCES) {
         try {
@@ -399,6 +401,8 @@ async function fetchNews() {
             console.error(`✗ Error fetching from ${source.name}:`, error.message);
         }
     }
+    
+    header.classList.remove('loading');
     
     // Sort by date
     return allNews.sort((a, b) => b.date - a.date);
@@ -466,7 +470,7 @@ function renderNews(newsItems, categoryFilter = 'all', sourceFilter = 'all', day
                 <span>${item.source}</span>
                 <span>${formatDate(item.date)}</span>
             </div>
-            <a href="${item.link}" target="_blank" rel="noopener noreferrer">Read more →</a>
+            <a href="${item.link}" target="_blank" rel="noopener noreferrer">Read more</a>
         </div>
     `).join('');
 }
