@@ -29,7 +29,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'Microsoft .NET Blog',
-        url: 'http://localhost:3000/api/rss?url=https://devblogs.microsoft.com/dotnet/feed/&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://devblogs.microsoft.com/dotnet/feed/&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -43,7 +43,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'VS Code Blog',
-        url: 'http://localhost:3000/api/rss?url=https://code.visualstudio.com/feed.xml&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://code.visualstudio.com/feed.xml&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -57,7 +57,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'Engineers Codex',
-        url: 'http://localhost:3000/api/rss?url=https://www.engineerscodex.com/rss.xml&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://www.engineerscodex.com/rss.xml&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -72,7 +72,7 @@ const NEWS_SOURCES = [
     // AI/ML Sources
     {
         name: 'The Batch (DeepLearning.AI)',
-        url: 'http://localhost:3000/api/rss?url=https://www.deeplearning.ai/the-batch/feed/&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://www.deeplearning.ai/the-batch/feed/&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -86,7 +86,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'OpenAI Blog',
-        url: 'http://localhost:3000/api/rss?url=https://openai.com/blog/rss/&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://openai.com/blog/rss/&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -100,7 +100,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'Hugging Face Blog',
-        url: 'http://localhost:3000/api/rss?url=https://huggingface.co/blog/feed.xml&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://huggingface.co/blog/feed.xml&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -114,7 +114,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'AI News',
-        url: 'http://localhost:3000/api/rss?url=https://www.artificialintelligence-news.com/feed/&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://www.artificialintelligence-news.com/feed/&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -129,7 +129,7 @@ const NEWS_SOURCES = [
     // Development Sources
     {
         name: 'Dev.to',
-        url: 'http://localhost:3000/api/rss?url=https://dev.to/feed&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://dev.to/feed&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -143,7 +143,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'GitHub Blog',
-        url: 'http://localhost:3000/api/rss?url=https://github.blog/feed/&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://github.blog/feed/&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -157,7 +157,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'Stack Overflow Blog',
-        url: 'http://localhost:3000/api/rss?url=https://stackoverflow.blog/feed/&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://stackoverflow.blog/feed/&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -171,7 +171,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'Martin Fowler',
-        url: 'http://localhost:3000/api/rss?url=https://martinfowler.com/feed.atom&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://martinfowler.com/feed.atom&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -185,7 +185,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'CSS-Tricks',
-        url: 'http://localhost:3000/api/rss?url=https://css-tricks.com/feed/&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://css-tricks.com/feed/&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -200,7 +200,7 @@ const NEWS_SOURCES = [
     // .NET Specific Sources
     {
         name: '.NET Foundation',
-        url: 'http://localhost:3000/api/rss?url=https://dotnetfoundation.org/blog/rss.xml&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://dotnetfoundation.org/blog/rss.xml&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -214,7 +214,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'Scott Hanselman',
-        url: 'http://localhost:3000/api/rss?url=https://www.hanselman.com/blog/feed/rss&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://www.hanselman.com/blog/feed/rss&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -228,7 +228,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'Andrew Lock',
-        url: 'http://localhost:3000/api/rss?url=https://andrewlock.net/rss.xml&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://andrewlock.net/rss.xml&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -243,7 +243,7 @@ const NEWS_SOURCES = [
     // Tech News Sources
     {
         name: 'Ars Technica',
-        url: 'http://localhost:3000/api/rss?url=https://feeds.arstechnica.com/arstechnica/index&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://feeds.arstechnica.com/arstechnica/index&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -257,7 +257,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'The Verge',
-        url: 'http://localhost:3000/api/rss?url=https://www.theverge.com/rss/index.xml&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://www.theverge.com/rss/index.xml&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
@@ -271,7 +271,7 @@ const NEWS_SOURCES = [
     
     {
         name: 'TechCrunch',
-        url: 'http://localhost:3000/api/rss?url=https://techcrunch.com/feed/&limit=50',
+        url: `${API_BASE_URL}/api/rss?url=https://techcrunch.com/feed/&limit=50`,
         type: 'rss',
         parser: (data) => data.items.map(item => ({
             title: item.title,
