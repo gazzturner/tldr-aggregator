@@ -174,8 +174,8 @@ main {
     color: var(--text-primary);
 }
 
-.theme-toggle-icon {
-    font-size: 1.3rem;
+.mobile-filter-toggle {
+    display: none;
 }
 
 .filter-section h3 {
@@ -405,6 +405,37 @@ main {
     
     .sidebar {
         position: static;
+        margin-bottom: 1.5rem;
+    }
+    
+    .mobile-filter-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        cursor: pointer;
+        margin-bottom: 1rem;
+    }
+    
+    .mobile-filter-toggle span {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .mobile-filter-toggle-icon {
+        font-size: 1.2rem;
+        transition: transform 0.3s;
+    }
+    
+    .sidebar.collapsed .filter-section {
+        display: none;
+    }
+    
+    .sidebar.collapsed .mobile-filter-toggle-icon {
+        transform: rotate(180deg);
     }
     
     .news-grid {
