@@ -18,6 +18,20 @@
     --accent-red: #f85149;
 }
 
+[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f6f8fa;
+    --bg-tertiary: #ffffff;
+    --border-color: #d0d7de;
+    --text-primary: #24292f;
+    --text-secondary: #57606a;
+    --accent-blue: #0969da;
+    --accent-purple: #8250df;
+    --accent-green: #1a7f37;
+    --accent-orange: #bc4c00;
+    --accent-red: #cf222e;
+}
+
 body {
     font-family: 'Segoe UI', 'Ubuntu', 'Roboto Mono', monospace;
     background: var(--bg-primary);
@@ -91,9 +105,72 @@ header p {
 }
 
 main {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+}
+
+.sidebar {
+    position: sticky;
+    top: 2rem;
+    height: fit-content;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.filter-section {
+    margin-bottom: 2rem;
+}
+
+.filter-section:last-child {
+    margin-bottom: 0;
+}
+
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.theme-toggle:hover {
+    border-color: var(--accent-blue);
+}
+
+.theme-toggle span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: 'Courier New', monospace;
+}
+
+.theme-toggle-icon {
+    font-size: 1.2rem;
+}
+
+.filter-section h3 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-family: 'Courier New', monospace;
+}
+
+.filter-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .filters {
@@ -126,16 +203,18 @@ main {
 }
 
 .filter-btn {
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1rem;
     border: 1px solid var(--border-color);
     background: var(--bg-tertiary);
     color: var(--text-primary);
     border-radius: 6px;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
     transition: all 0.2s;
     font-family: 'Courier New', monospace;
+    text-align: left;
+    width: 100%;
 }
 
 .filter-btn:hover {
@@ -150,17 +229,18 @@ main {
 }
 
 .source-select {
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1rem;
     border: 1px solid var(--border-color);
     background: var(--bg-tertiary);
     color: var(--text-primary);
     border-radius: 6px;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
     transition: all 0.2s;
     outline: none;
     font-family: 'Courier New', monospace;
+    width: 100%;
 }
 
 .source-select:hover {
@@ -286,6 +366,15 @@ main {
 }
 
 @media (max-width: 768px) {
+    main {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+    
+    .sidebar {
+        position: static;
+    }
+    
     .news-grid {
         grid-template-columns: 1fr;
     }

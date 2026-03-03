@@ -17,9 +17,9 @@
     </header>
 
     <main>
-        <div class="filters">
-            <div class="filter-group">
-                <label>Category:</label>
+        <aside class="sidebar">
+            <div class="filter-section">
+                <h3>Category</h3>
                 <div class="filter-buttons">
                     <button class="filter-btn active" data-category="all">All</button>
                     <button class="filter-btn" data-category="dotnet">.NET</button>
@@ -28,15 +28,15 @@
                 </div>
             </div>
             
-            <div class="filter-group">
-                <label for="source-filter">Source:</label>
+            <div class="filter-section">
+                <h3>Source</h3>
                 <select id="source-filter" class="source-select">
                     <option value="all">All Sources</option>
                 </select>
             </div>
             
-            <div class="filter-group">
-                <label for="date-filter">Time:</label>
+            <div class="filter-section">
+                <h3>Time Range</h3>
                 <select id="date-filter" class="source-select">
                     <option value="1">Last 24 hours</option>
                     <option value="3">Last 3 days</option>
@@ -46,7 +46,25 @@
                     <option value="365">Last year</option>
                 </select>
             </div>
-        </div>
+            
+            <div class="filter-section">
+                <h3>Sort By</h3>
+                <select id="sort-filter" class="source-select">
+                    <option value="date-desc" selected>Newest First</option>
+                    <option value="date-asc">Oldest First</option>
+                    <option value="source">By Source</option>
+                    <option value="title">By Title</option>
+                </select>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Theme</h3>
+                <div class="theme-toggle" id="theme-toggle">
+                    <span>Dark Mode</span>
+                    <span class="theme-toggle-icon">🌙</span>
+                </div>
+            </div>
+        </aside>
 
         <div id="news-container" class="news-grid">
             <div class="loading">Loading news...</div>

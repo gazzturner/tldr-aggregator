@@ -40,6 +40,248 @@ const NEWS_SOURCES = [
             category: 'dotnet'
         }))
     },
+    
+    {
+        name: 'VS Code Blog',
+        url: 'http://localhost:3000/api/rss?url=https://code.visualstudio.com/feed.xml&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'VS Code Blog',
+            date: new Date(item.pubDate),
+            category: 'dev'
+        }))
+    },
+    
+    {
+        name: 'Engineers Codex',
+        url: 'http://localhost:3000/api/rss?url=https://www.engineerscodex.com/rss.xml&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Engineers Codex',
+            date: new Date(item.pubDate),
+            category: categorizeContent(item.title + ' ' + item.description)
+        }))
+    },
+    
+    // AI/ML Sources
+    {
+        name: 'The Batch (DeepLearning.AI)',
+        url: 'http://localhost:3000/api/rss?url=https://www.deeplearning.ai/the-batch/feed/&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'The Batch',
+            date: new Date(item.pubDate),
+            category: 'ai'
+        }))
+    },
+    
+    {
+        name: 'OpenAI Blog',
+        url: 'http://localhost:3000/api/rss?url=https://openai.com/blog/rss/&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'OpenAI Blog',
+            date: new Date(item.pubDate),
+            category: 'ai'
+        }))
+    },
+    
+    {
+        name: 'Hugging Face Blog',
+        url: 'http://localhost:3000/api/rss?url=https://huggingface.co/blog/feed.xml&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Hugging Face',
+            date: new Date(item.pubDate),
+            category: 'ai'
+        }))
+    },
+    
+    {
+        name: 'AI News',
+        url: 'http://localhost:3000/api/rss?url=https://www.artificialintelligence-news.com/feed/&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'AI News',
+            date: new Date(item.pubDate),
+            category: 'ai'
+        }))
+    },
+    
+    // Development Sources
+    {
+        name: 'Dev.to',
+        url: 'http://localhost:3000/api/rss?url=https://dev.to/feed&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Dev.to',
+            date: new Date(item.pubDate),
+            category: categorizeContent(item.title + ' ' + item.description)
+        }))
+    },
+    
+    {
+        name: 'GitHub Blog',
+        url: 'http://localhost:3000/api/rss?url=https://github.blog/feed/&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'GitHub Blog',
+            date: new Date(item.pubDate),
+            category: 'dev'
+        }))
+    },
+    
+    {
+        name: 'Stack Overflow Blog',
+        url: 'http://localhost:3000/api/rss?url=https://stackoverflow.blog/feed/&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Stack Overflow',
+            date: new Date(item.pubDate),
+            category: 'dev'
+        }))
+    },
+    
+    {
+        name: 'Martin Fowler',
+        url: 'http://localhost:3000/api/rss?url=https://martinfowler.com/feed.atom&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Martin Fowler',
+            date: new Date(item.pubDate),
+            category: 'dev'
+        }))
+    },
+    
+    {
+        name: 'CSS-Tricks',
+        url: 'http://localhost:3000/api/rss?url=https://css-tricks.com/feed/&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'CSS-Tricks',
+            date: new Date(item.pubDate),
+            category: 'dev'
+        }))
+    },
+    
+    // .NET Specific Sources
+    {
+        name: '.NET Foundation',
+        url: 'http://localhost:3000/api/rss?url=https://dotnetfoundation.org/blog/rss.xml&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: '.NET Foundation',
+            date: new Date(item.pubDate),
+            category: 'dotnet'
+        }))
+    },
+    
+    {
+        name: 'Scott Hanselman',
+        url: 'http://localhost:3000/api/rss?url=https://www.hanselman.com/blog/feed/rss&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Scott Hanselman',
+            date: new Date(item.pubDate),
+            category: 'dotnet'
+        }))
+    },
+    
+    {
+        name: 'Andrew Lock',
+        url: 'http://localhost:3000/api/rss?url=https://andrewlock.net/rss.xml&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Andrew Lock',
+            date: new Date(item.pubDate),
+            category: 'dotnet'
+        }))
+    },
+    
+    // Tech News Sources
+    {
+        name: 'Ars Technica',
+        url: 'http://localhost:3000/api/rss?url=https://feeds.arstechnica.com/arstechnica/index&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Ars Technica',
+            date: new Date(item.pubDate),
+            category: categorizeContent(item.title + ' ' + item.description)
+        }))
+    },
+    
+    {
+        name: 'The Verge',
+        url: 'http://localhost:3000/api/rss?url=https://www.theverge.com/rss/index.xml&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'The Verge',
+            date: new Date(item.pubDate),
+            category: categorizeContent(item.title + ' ' + item.description)
+        }))
+    },
+    
+    {
+        name: 'TechCrunch',
+        url: 'http://localhost:3000/api/rss?url=https://techcrunch.com/feed/&limit=50',
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'TechCrunch',
+            date: new Date(item.pubDate),
+            category: categorizeContent(item.title + ' ' + item.description)
+        }))
+    },
     {
         name: 'TLDR AI',
         url: 'https://api.rss2json.com/v1/api.json?rss_url=https://tldr.tech/api/rss/ai/',
@@ -163,7 +405,7 @@ async function fetchNews() {
 }
 
 // Render news cards
-function renderNews(newsItems, categoryFilter = 'all', sourceFilter = 'all', daysBack = 7, searchQuery = '') {
+function renderNews(newsItems, categoryFilter = 'all', sourceFilter = 'all', daysBack = 7, searchQuery = '', sortBy = 'date-desc') {
     const container = document.getElementById('news-container');
     
     let filtered = newsItems;
@@ -189,6 +431,25 @@ function renderNews(newsItems, categoryFilter = 'all', sourceFilter = 'all', day
             item.title.toLowerCase().includes(searchQuery) ||
             item.description.toLowerCase().includes(searchQuery)
         );
+    }
+    
+    // Apply sorting
+    switch(sortBy) {
+        case 'date-desc':
+            filtered.sort((a, b) => b.date - a.date);
+            break;
+        case 'date-asc':
+            filtered.sort((a, b) => a.date - b.date);
+            break;
+        case 'source':
+            filtered.sort((a, b) => {
+                const sourceCompare = a.source.localeCompare(b.source);
+                return sourceCompare !== 0 ? sourceCompare : b.date - a.date;
+            });
+            break;
+        case 'title':
+            filtered.sort((a, b) => a.title.localeCompare(b.title));
+            break;
     }
     
     if (filtered.length === 0) {
@@ -226,8 +487,40 @@ let currentCategoryFilter = 'all';
 let currentSourceFilter = 'all';
 let currentDateFilter = 7; // days
 let currentSearchQuery = '';
+let currentSort = 'date-desc';
+
+// Theme toggle
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeToggle(savedTheme);
+    
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeToggle(newTheme);
+    });
+}
+
+function updateThemeToggle(theme) {
+    const toggle = document.getElementById('theme-toggle');
+    const span = toggle.querySelector('span:first-child');
+    const icon = toggle.querySelector('.theme-toggle-icon');
+    
+    if (theme === 'dark') {
+        span.textContent = 'Dark Mode';
+        icon.textContent = '🌙';
+    } else {
+        span.textContent = 'Light Mode';
+        icon.textContent = '☀️';
+    }
+}
 
 async function init() {
+    initTheme();
+    
     currentNews = await fetchNews();
     
     // Populate source filter dropdown
@@ -245,27 +538,33 @@ async function init() {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentCategoryFilter = btn.dataset.category;
-            renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery);
+            renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
         });
     });
     
     // Setup source filter dropdown
     sourceSelect.addEventListener('change', (e) => {
         currentSourceFilter = e.target.value;
-        renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery);
+        renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
     });
     
     // Setup date filter dropdown
     document.getElementById('date-filter').addEventListener('change', (e) => {
         currentDateFilter = parseInt(e.target.value);
-        renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery);
+        renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
     });
     
     // Setup search input
     const searchInput = document.getElementById('search-input');
     searchInput.addEventListener('input', (e) => {
         currentSearchQuery = e.target.value.toLowerCase();
-        renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery);
+        renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
+    });
+    
+    // Setup sort dropdown
+    document.getElementById('sort-filter').addEventListener('change', (e) => {
+        currentSort = e.target.value;
+        renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
     });
 }
 
