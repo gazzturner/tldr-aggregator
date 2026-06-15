@@ -1,631 +1,203 @@
 import API_BASE_URL from './config.js';
 
-// News sources configuration
+// Helper to build a proxied RSS URL
+const rss = (feed, limit = 50) =>
+    `${API_BASE_URL}/api/rss?url=${feed}&limit=${limit}`;
+
+// =====================================================
+// NEWS SOURCES
+// Each source: { name, url, format, category, weight }
+//   format:   'rss' | 'hn' | 'devto'
+//   category: 'core' | 'dotnet' | 'ai' | 'engineering' | 'releases' | 'community'
+//   weight:   0-100 editorial quality score used for ranking
+// =====================================================
 const NEWS_SOURCES = [
-    // {
-    //     name: 'Hacker News',
-    //     url: 'https://hn.algolia.com/api/v1/search?tags=story&hitsPerPage=50',
-    //     type: 'api', // 'api' or 'rss'
-    //     parser: (data) => data.hits.map(item => ({
-    //         title: item.title,
-    //         description: item.url || '',
-    //         link: item.url || `https://news.ycombinator.com/item?id=${item.objectID}`,
-    //         source: 'Hacker News',
-    //         date: new Date(item.created_at),
-    //         category: categorizeContent(item.title)
-    //     })).filter(item => item.link && item.link.startsWith('http'))
-    // },
-    {
-        name: 'TLDR Dev',
-        url: 'http://localhost:3000/api/rss?url=https://tldr.tech/api/rss/dev/&limit=50',
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'TLDR Dev',
-            date: new Date(item.pubDate),
-            category: categorizeContent(item.title + ' ' + item.description)
-        }))
-    },
-    
-    {
-        name: 'Microsoft .NET Blog',
-        url: `${API_BASE_URL}/api/rss?url=https://devblogs.microsoft.com/dotnet/feed/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Microsoft .NET Blog',
-            date: new Date(item.pubDate),
-            category: 'dotnet'
-        }))
-    },
-    
-    {
-        name: 'VS Code Blog',
-        url: `${API_BASE_URL}/api/rss?url=https://code.visualstudio.com/feed.xml&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'VS Code Blog',
-            date: new Date(item.pubDate),
-            category: 'dev'
-        }))
-    },
-    
-    {
-        name: 'Engineers Codex',
-        url: `${API_BASE_URL}/api/rss?url=https://www.engineerscodex.com/rss.xml&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Engineers Codex',
-            date: new Date(item.pubDate),
-            category: categorizeContent(item.title + ' ' + item.description)
-        }))
-    },
-    
-    // AI/ML Sources
-    {
-        name: 'The Batch (DeepLearning.AI)',
-        url: `${API_BASE_URL}/api/rss?url=https://www.deeplearning.ai/the-batch/feed/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'The Batch',
-            date: new Date(item.pubDate),
-            category: 'ai'
-        }))
-    },
-    
-    {
-        name: 'OpenAI Blog',
-        url: `${API_BASE_URL}/api/rss?url=https://openai.com/blog/rss/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'OpenAI Blog',
-            date: new Date(item.pubDate),
-            category: 'ai'
-        }))
-    },
-    
-    {
-        name: 'Hugging Face Blog',
-        url: `${API_BASE_URL}/api/rss?url=https://huggingface.co/blog/feed.xml&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Hugging Face',
-            date: new Date(item.pubDate),
-            category: 'ai'
-        }))
-    },
-    
-    {
-        name: 'AI News',
-        url: `${API_BASE_URL}/api/rss?url=https://www.artificialintelligence-news.com/feed/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'AI News',
-            date: new Date(item.pubDate),
-            category: 'ai'
-        }))
-    },
-    
-    // Development Sources
-    {
-        name: 'Dev.to',
-        url: `${API_BASE_URL}/api/rss?url=https://dev.to/feed&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Dev.to',
-            date: new Date(item.pubDate),
-            category: categorizeContent(item.title + ' ' + item.description)
-        }))
-    },
-    
-    {
-        name: 'GitHub Blog',
-        url: `${API_BASE_URL}/api/rss?url=https://github.blog/feed/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'GitHub Blog',
-            date: new Date(item.pubDate),
-            category: 'dev'
-        }))
-    },
-    
-    {
-        name: 'Stack Overflow Blog',
-        url: `${API_BASE_URL}/api/rss?url=https://stackoverflow.blog/feed/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Stack Overflow',
-            date: new Date(item.pubDate),
-            category: 'dev'
-        }))
-    },
-    
-    {
-        name: 'Martin Fowler',
-        url: `${API_BASE_URL}/api/rss?url=https://martinfowler.com/feed.atom&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Martin Fowler',
-            date: new Date(item.pubDate),
-            category: 'dev'
-        }))
-    },
-    
-    {
-        name: 'CSS-Tricks',
-        url: `${API_BASE_URL}/api/rss?url=https://css-tricks.com/feed/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'CSS-Tricks',
-            date: new Date(item.pubDate),
-            category: 'dev'
-        }))
-    },
-    
-    // .NET Specific Sources
-    {
-        name: '.NET Foundation',
-        url: `${API_BASE_URL}/api/rss?url=https://dotnetfoundation.org/blog/rss.xml&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: '.NET Foundation',
-            date: new Date(item.pubDate),
-            category: 'dotnet'
-        }))
-    },
-    
-    {
-        name: 'Scott Hanselman',
-        url: `${API_BASE_URL}/api/rss?url=https://www.hanselman.com/blog/feed/rss&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Scott Hanselman',
-            date: new Date(item.pubDate),
-            category: 'dotnet'
-        }))
-    },
-    
-    {
-        name: 'Andrew Lock',
-        url: `${API_BASE_URL}/api/rss?url=https://andrewlock.net/rss.xml&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Andrew Lock',
-            date: new Date(item.pubDate),
-            category: 'dotnet'
-        }))
-    },
-    
-    // Tech News Sources
-    {
-        name: 'Ars Technica',
-        url: `${API_BASE_URL}/api/rss?url=https://feeds.arstechnica.com/arstechnica/index&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Ars Technica',
-            date: new Date(item.pubDate),
-            category: categorizeContent(item.title + ' ' + item.description)
-        }))
-    },
-    
-    {
-        name: 'The Verge',
-        url: `${API_BASE_URL}/api/rss?url=https://www.theverge.com/rss/index.xml&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'The Verge',
-            date: new Date(item.pubDate),
-            category: categorizeContent(item.title + ' ' + item.description)
-        }))
-    },
-    
-    {
-        name: 'TechCrunch',
-        url: `${API_BASE_URL}/api/rss?url=https://techcrunch.com/feed/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'TechCrunch',
-            date: new Date(item.pubDate),
-            category: categorizeContent(item.title + ' ' + item.description)
-        }))
-    },
-    
-    // Engineering Blogs
-    {
-        name: 'Netflix Tech Blog',
-        url: `${API_BASE_URL}/api/rss?url=https://netflixtechblog.com/feed&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Netflix Tech Blog',
-            date: new Date(item.pubDate),
-            category: 'dev'
-        }))
-    },
-    
-    {
-        name: 'Cloudflare Blog',
-        url: `${API_BASE_URL}/api/rss?url=https://blog.cloudflare.com/rss/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Cloudflare Blog',
-            date: new Date(item.pubDate),
-            category: categorizeContent(item.title + ' ' + item.description)
-        }))
-    },
-    
-    {
-        name: 'GitHub Engineering',
-        url: `${API_BASE_URL}/api/rss?url=https://github.blog/engineering/feed/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'GitHub Engineering',
-            date: new Date(item.pubDate),
-            category: 'dev'
-        }))
-    },
-    
-    {
-        name: 'Uber Engineering',
-        url: `${API_BASE_URL}/api/rss?url=https://www.uber.com/blog/rss/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Uber Engineering',
-            date: new Date(item.pubDate),
-            category: 'dev'
-        }))
-    },
-    
-    {
-        name: 'InfoQ',
-        url: `${API_BASE_URL}/api/rss?url=https://feed.infoq.com/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'InfoQ',
-            date: new Date(item.pubDate),
-            category: categorizeContent(item.title + ' ' + item.description)
-        }))
-    },
-    
-    {
-        name: 'The Pragmatic Engineer',
-        url: `${API_BASE_URL}/api/rss?url=https://blog.pragmaticengineer.com/rss/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'The Pragmatic Engineer',
-            date: new Date(item.pubDate),
-            category: 'dev'
-        }))
-    },
-    
-    {
-        name: 'Hacker Noon',
-        url: `${API_BASE_URL}/api/rss?url=https://hackernoon.com/feed&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Hacker Noon',
-            date: new Date(item.pubDate),
-            category: categorizeContent(item.title + ' ' + item.description)
-        }))
-    },
-    
-    {
-        name: 'SitePoint',
-        url: `${API_BASE_URL}/api/rss?url=https://www.sitepoint.com/feed/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'SitePoint',
-            date: new Date(item.pubDate),
-            category: 'dev'
-        }))
-    },
-    
-    // AI Sources
-    {
-        name: 'Google AI Blog',
-        url: `${API_BASE_URL}/api/rss?url=https://blog.google/technology/ai/rss/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Google AI Blog',
-            date: new Date(item.pubDate),
-            category: 'ai'
-        }))
-    },
-    
-    {
-        name: 'MIT Tech Review (AI)',
-        url: `${API_BASE_URL}/api/rss?url=https://www.technologyreview.com/topic/artificial-intelligence/feed&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'MIT Tech Review',
-            date: new Date(item.pubDate),
-            category: 'ai'
-        }))
-    },
-    
-    // .NET / Microsoft Sources
-    {
-        name: 'Microsoft DevBlogs',
-        url: `${API_BASE_URL}/api/rss?url=https://devblogs.microsoft.com/feed/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Microsoft DevBlogs',
-            date: new Date(item.pubDate),
-            category: categorizeContent(item.title + ' ' + item.description)
-        }))
-    },
-    
-    {
-        name: 'JetBrains .NET Blog',
-        url: `${API_BASE_URL}/api/rss?url=https://blog.jetbrains.com/dotnet/feed/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'JetBrains .NET',
-            date: new Date(item.pubDate),
-            category: 'dotnet'
-        }))
-    },
-    
-    {
-        name: 'Code Maze',
-        url: `${API_BASE_URL}/api/rss?url=https://code-maze.com/feed/&limit=50`,
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Code Maze',
-            date: new Date(item.pubDate),
-            category: 'dotnet'
-        }))
-    },
-    {
-        name: 'TLDR AI',
-        url: 'https://api.rss2json.com/v1/api.json?rss_url=https://tldr.tech/api/rss/ai/',
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'TLDR AI',
-            date: new Date(item.pubDate),
-            category: categorizeContent(item.title + ' ' + item.description)
-        }))
-    },
-    // SKELETON: Add Dev.to API
-    {
-        name: 'Dev.to',
-        url: 'https://dev.to/api/articles?per_page=10&tag=dotnet',
-        type: 'api',
-        parser: (data) => data.map(item => ({
-            title: item.title,
-            description: item.description,
-            link: item.url,
-            source: 'Dev.to',
-            date: new Date(item.published_at),
-            category: categorizeContent(item.title + ' ' + item.tags)
-        }))
-    },
-    
-    // SKELETON: Add Reddit API
-    {
-        name: 'Reddit - r/dotnet',
-        url: 'https://www.reddit.com/r/dotnet/hot.json?limit=10',
-        type: 'api',
-        parser: (data) => data.data.children.map(item => ({
-            title: item.data.title,
-            description: item.data.selftext.substring(0, 200),
-            link: item.data.url,
-            source: 'Reddit r/dotnet',
-            date: new Date(item.data.created_utc * 1000),
-            category: 'dotnet'
-        }))
-    },
-    
-    // SKELETON: Add GitHub Trending (via API)
-    {
-        name: 'GitHub Trending',
-        url: 'https://api.github.com/search/repositories?q=language:csharp&sort=stars&order=desc&per_page=10',
-        type: 'api',
-        parser: (data) => data.items.map(item => ({
-            title: item.full_name,
-            description: item.description,
-            link: item.html_url,
-            source: 'GitHub',
-            date: new Date(item.updated_at),
-            category: 'dotnet'
-        }))
-    },
-    {
-        name: 'Microsoft .NET Blog',
-        url: 'https://api.rss2json.com/v1/api.json?rss_url=https://devblogs.microsoft.com/dotnet/feed/',
-        type: 'rss',
-        parser: (data) => data.items.map(item => ({
-            title: item.title,
-            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-            link: item.link,
-            source: 'Microsoft .NET Blog',
-            date: new Date(item.pubDate),
-            category: 'dotnet'
-        }))
-    }
-    // SKELETON: RSS Feed via proxy (for scraping sites without APIs)
-    // Note: Direct RSS parsing requires a CORS proxy or backend
-    // {
-    //     name: 'Microsoft .NET Blog',
-    //     url: 'https://api.rss2json.com/v1/api.json?rss_url=https://devblogs.microsoft.com/dotnet/feed/&count=50',
-    //     type: 'rss',
-    //     parser: (data) => data.items.map(item => ({
-    //         title: item.title,
-    //         description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
-    //         link: item.link,
-    //         source: 'Microsoft .NET Blog',
-    //         date: new Date(item.pubDate),
-    //         category: 'dotnet'
-    //     }))
-    // }
+    // ===== CORE DEVELOPMENT =====
+    { name: 'TLDR Dev',               url: rss('https://tldr.tech/api/rss/dev/'),                 format: 'rss', category: 'core', weight: 80 },
+    { name: 'VS Code Blog',           url: rss('https://code.visualstudio.com/feed.xml'),         format: 'rss', category: 'core', weight: 80 },
+    { name: 'Engineers Codex',        url: rss('https://www.engineerscodex.com/rss.xml'),         format: 'rss', category: 'core', weight: 78 },
+    { name: 'GitHub Blog',            url: rss('https://github.blog/feed/'),                      format: 'rss', category: 'core', weight: 85 },
+    { name: 'Martin Fowler',          url: rss('https://martinfowler.com/feed.atom'),             format: 'rss', category: 'core', weight: 95 },
+    { name: 'Ars Technica',           url: rss('https://feeds.arstechnica.com/arstechnica/index'),format: 'rss', category: 'core', weight: 70 },
+    { name: 'InfoQ',                  url: rss('https://feed.infoq.com/'),                        format: 'rss', category: 'core', weight: 90 },
+    { name: 'The Pragmatic Engineer', url: rss('https://blog.pragmaticengineer.com/rss/'),        format: 'rss', category: 'core', weight: 95 },
+    { name: 'ByteByteGo',             url: rss('https://blog.bytebytego.com/feed'),               format: 'rss', category: 'core', weight: 90 },
+    { name: 'High Scalability',       url: rss('http://highscalability.com/rss.xml'),             format: 'rss', category: 'core', weight: 82 },
+    { name: 'Xe Iaso',                url: rss('https://xeiaso.net/blog.rss'),                    format: 'rss', category: 'core', weight: 82 },
+    { name: 'Increment Magazine',     url: rss('https://increment.com/feed.xml'),                 format: 'rss', category: 'core', weight: 78 },
+
+    // ===== .NET =====
+    { name: 'Microsoft .NET Blog',    url: rss('https://devblogs.microsoft.com/dotnet/feed/'),    format: 'rss', category: 'dotnet', weight: 100 },
+    { name: 'Microsoft DevBlogs',     url: rss('https://devblogs.microsoft.com/feed/'),           format: 'rss', category: 'dotnet', weight: 85 },
+    { name: '.NET Foundation',        url: rss('https://dotnetfoundation.org/blog/rss.xml'),      format: 'rss', category: 'dotnet', weight: 82 },
+    { name: 'Scott Hanselman',        url: rss('https://www.hanselman.com/blog/feed/rss'),        format: 'rss', category: 'dotnet', weight: 90 },
+    { name: 'Andrew Lock',            url: rss('https://andrewlock.net/rss.xml'),                 format: 'rss', category: 'dotnet', weight: 95 },
+    { name: 'Nick Chapsas',           url: rss('https://nickchapsas.com/rss'),                    format: 'rss', category: 'dotnet', weight: 90 },
+    { name: 'Khalid Abuhakmeh',       url: rss('https://khalidabuhakmeh.com/feed.xml'),           format: 'rss', category: 'dotnet', weight: 82 },
+    { name: 'Jimmy Bogard',           url: rss('https://jimmybogard.com/rss'),                    format: 'rss', category: 'dotnet', weight: 90 },
+    { name: 'Steve Gordon',           url: rss('https://www.stevejgordon.co.uk/feed'),            format: 'rss', category: 'dotnet', weight: 85 },
+    { name: 'Maoni Stephens',         url: rss('https://maoni0.medium.com/feed'),                 format: 'rss', category: 'dotnet', weight: 90 },
+    { name: 'JetBrains .NET Blog',    url: rss('https://blog.jetbrains.com/dotnet/feed/'),        format: 'rss', category: 'dotnet', weight: 85 },
+
+    // ===== AI =====
+    { name: 'OpenAI Blog',            url: rss('https://openai.com/blog/rss/'),                   format: 'rss', category: 'ai', weight: 100 },
+    { name: 'Anthropic News',         url: rss('https://www.anthropic.com/news/rss'),             format: 'rss', category: 'ai', weight: 100 },
+    { name: 'Google AI Blog',         url: rss('https://blog.google/technology/ai/rss/'),         format: 'rss', category: 'ai', weight: 90 },
+    { name: 'Hugging Face Blog',      url: rss('https://huggingface.co/blog/feed.xml'),           format: 'rss', category: 'ai', weight: 85 },
+    { name: 'The Batch',              url: rss('https://www.deeplearning.ai/the-batch/feed/'),    format: 'rss', category: 'ai', weight: 88 },
+    { name: 'Simon Willison',         url: rss('https://simonwillison.net/atom/everything/'),     format: 'rss', category: 'ai', weight: 95 },
+    { name: 'Simon Willison Links',   url: rss('https://simonwillison.net/links/rss/'),           format: 'rss', category: 'ai', weight: 88 },
+    { name: 'Ahead of AI',            url: rss('https://magazine.sebastianraschka.com/feed'),     format: 'rss', category: 'ai', weight: 90 },
+    { name: 'MIT Tech Review AI',     url: rss('https://www.technologyreview.com/topic/artificial-intelligence/feed'), format: 'rss', category: 'ai', weight: 82 },
+    { name: 'TLDR AI',                url: rss('https://tldr.tech/api/rss/ai/'),                  format: 'rss', category: 'ai', weight: 80 },
+
+    // ===== ENGINEERING =====
+    { name: 'Cloudflare Blog',        url: rss('https://blog.cloudflare.com/rss/'),               format: 'rss', category: 'engineering', weight: 90 },
+    { name: 'GitHub Engineering',     url: rss('https://github.blog/engineering/feed/'),          format: 'rss', category: 'engineering', weight: 88 },
+    { name: 'Netflix Tech Blog',      url: rss('https://netflixtechblog.com/feed'),               format: 'rss', category: 'engineering', weight: 88 },
+
+    // ===== RELEASES =====
+    { name: '.NET Runtime Releases',  url: rss('https://github.com/dotnet/runtime/releases.atom', 20),          format: 'rss', category: 'releases', weight: 92 },
+    { name: 'ASP.NET Core Releases',  url: rss('https://github.com/dotnet/aspnetcore/releases.atom', 20),       format: 'rss', category: 'releases', weight: 92 },
+    { name: 'Semantic Kernel Releases', url: rss('https://github.com/microsoft/semantic-kernel/releases.atom', 20), format: 'rss', category: 'releases', weight: 85 },
+    { name: 'Ollama Releases',        url: rss('https://github.com/ollama/ollama/releases.atom', 20),           format: 'rss', category: 'releases', weight: 85 },
+
+    // ===== COMMUNITY =====
+    // Reddit routed through the RSS proxy to avoid browser CORS issues
+    { name: 'Reddit r/dotnet',        url: rss('https://www.reddit.com/r/dotnet/hot/.rss', 25),    format: 'rss',   category: 'community', weight: 75 },
+    { name: 'Reddit r/LocalLLaMA',    url: rss('https://www.reddit.com/r/LocalLLaMA/hot/.rss', 25),format: 'rss',   category: 'community', weight: 75 },
+    { name: 'Dev.to',                 url: 'https://dev.to/api/articles?per_page=15&tag=dotnet',   format: 'devto', category: 'community', weight: 60 },
+    { name: 'Hacker News',            url: 'https://hn.algolia.com/api/v1/search?tags=front_page', format: 'hn',    category: 'community', weight: 75 },
 ];
 
-// Categorize content based on keywords
-function categorizeContent(text) {
-    const lower = text.toLowerCase();
-    if (lower.includes('.net') || lower.includes('dotnet') || lower.includes('c#') || lower.includes('csharp') || lower.includes('blazor') || lower.includes('asp.net')) {
-        return 'dotnet';
-    }
-    if (lower.includes('ai') || lower.includes('machine learning') || lower.includes('ml') || lower.includes('gpt') || lower.includes('llm') || lower.includes('neural')) {
-        return 'ai';
-    }
-    return 'dev';
+
+// Display labels for category badges
+const CATEGORY_LABELS = {
+    core: 'Core',
+    dotnet: '.NET',
+    ai: 'AI',
+    engineering: 'Eng',
+    releases: 'Release',
+    community: 'Community'
+};
+
+// Strip HTML tags and trim to a readable snippet
+function cleanText(str) {
+    return (str || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 }
 
-// Fetch news from all sources
+// Convert a raw feed payload into normalized article objects
+function parseItems(data, source) {
+    let raw = [];
+
+    switch (source.format) {
+        case 'rss':
+            raw = (data.items || []).map(i => ({
+                title: cleanText(i.title),
+                description: cleanText(i.description || i.contentSnippet || i.content),
+                link: i.link,
+                date: new Date(i.pubDate || i.isoDate)
+            }));
+            break;
+
+        case 'hn':
+            raw = (data.hits || []).map(i => ({
+                title: cleanText(i.title),
+                description: i.url || '',
+                link: i.url || `https://news.ycombinator.com/item?id=${i.objectID}`,
+                date: new Date(i.created_at)
+            }));
+            break;
+
+        case 'devto':
+            raw = (data || []).map(i => ({
+                title: cleanText(i.title),
+                description: cleanText(i.description),
+                link: i.url,
+                date: new Date(i.published_at)
+            }));
+            break;
+    }
+
+    return raw
+        .filter(i => i.title && i.link && !isNaN(i.date))
+        .map(i => ({
+            ...i,
+            source: source.name,
+            category: source.category,
+            weight: source.weight
+        }));
+}
+
+// Recommended ranking: editorial weight blended with recency decay.
+// Fresh items get up to +40; the bonus halves roughly every ~33h.
+function rankScore(item) {
+    const ageHours = Math.max(0, (Date.now() - item.date.getTime()) / 3.6e6);
+    const recencyBonus = 40 * Math.exp(-ageHours / 48);
+    return (item.weight ?? 50) + recencyBonus;
+}
+
+// Fetch news from all sources (in parallel)
 async function fetchNews() {
-    const allNews = [];
     const header = document.querySelector('header');
     header.classList.add('loading');
-    
-    for (const source of NEWS_SOURCES) {
+
+    const results = await Promise.all(NEWS_SOURCES.map(async (source) => {
         try {
             const response = await fetch(source.url);
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             const data = await response.json();
-            const parsedNews = source.parser(data);
-            allNews.push(...parsedNews);
-            console.log(`✓ Fetched ${parsedNews.length} items from ${source.name}`);
+            const items = parseItems(data, source);
+            console.log(`✓ ${items.length} items from ${source.name}`);
+            return items;
         } catch (error) {
             console.error(`✗ Error fetching from ${source.name}:`, error.message);
+            return [];
         }
-    }
-    
+    }));
+
     header.classList.remove('loading');
-    
-    // Sort by date
-    return allNews.sort((a, b) => b.date - a.date);
+
+    // Default ordering: recommended (weight + recency)
+    return results.flat().sort((a, b) => rankScore(b) - rankScore(a));
 }
 
 // Render news cards
-function renderNews(newsItems, categoryFilter = 'all', sourceFilter = 'all', daysBack = 7, searchQuery = '', sortBy = 'date-desc') {
+function renderNews(newsItems, categoryFilter = 'all', sourceFilter = 'all', daysBack = 7, searchQuery = '', sortBy = 'recommended') {
     const container = document.getElementById('news-container');
-    
+
     let filtered = newsItems;
-    
-    // Apply date filter
+
+    // Date filter
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysBack);
     filtered = filtered.filter(item => item.date >= cutoffDate);
-    
-    // Apply category filter
+
+    // Category filter
     if (categoryFilter !== 'all') {
         filtered = filtered.filter(item => item.category === categoryFilter);
     }
-    
-    // Apply source filter
+
+    // Source filter
     if (sourceFilter !== 'all') {
         filtered = filtered.filter(item => item.source === sourceFilter);
     }
-    
-    // Apply search filter
+
+    // Search filter
     if (searchQuery) {
-        filtered = filtered.filter(item => 
+        filtered = filtered.filter(item =>
             item.title.toLowerCase().includes(searchQuery) ||
             item.description.toLowerCase().includes(searchQuery)
         );
     }
-    
-    // Apply sorting
-    switch(sortBy) {
+
+    // Sorting
+    switch (sortBy) {
+        case 'recommended':
+            filtered.sort((a, b) => rankScore(b) - rankScore(a));
+            break;
         case 'date-desc':
             filtered.sort((a, b) => b.date - a.date);
             break;
@@ -634,23 +206,23 @@ function renderNews(newsItems, categoryFilter = 'all', sourceFilter = 'all', day
             break;
         case 'source':
             filtered.sort((a, b) => {
-                const sourceCompare = a.source.localeCompare(b.source);
-                return sourceCompare !== 0 ? sourceCompare : b.date - a.date;
+                const cmp = a.source.localeCompare(b.source);
+                return cmp !== 0 ? cmp : b.date - a.date;
             });
             break;
         case 'title':
             filtered.sort((a, b) => a.title.localeCompare(b.title));
             break;
     }
-    
+
     if (filtered.length === 0) {
         container.innerHTML = '<div class="loading">No news found for this filter combination</div>';
         return;
     }
-    
+
     container.innerHTML = filtered.map(item => `
         <div class="news-card">
-            <span class="category ${item.category}">${item.category.toUpperCase()}</span>
+            <span class="category ${item.category}">${CATEGORY_LABELS[item.category] || item.category}</span>
             <h3>${item.title}</h3>
             <p>${item.description ? item.description.substring(0, 150) + '...' : ''}</p>
             <div class="meta">
@@ -666,8 +238,7 @@ function renderNews(newsItems, categoryFilter = 'all', sourceFilter = 'all', day
 function formatDate(date) {
     const now = new Date();
     const diff = Math.floor((now - date) / 1000);
-    
-    // Handle future-dated items (timezone quirks in some feeds)
+
     if (diff < 60) return 'just now';
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
@@ -675,20 +246,24 @@ function formatDate(date) {
     return `${Math.floor(diff / 604800)}w ago`;
 }
 
-// Initialize app
+// ===== App state =====
 let currentNews = [];
 let currentCategoryFilter = 'all';
 let currentSourceFilter = 'all';
 let currentDateFilter = 7; // days
 let currentSearchQuery = '';
-let currentSort = 'date-desc';
+let currentSort = 'recommended';
 
-// Theme toggle
+function rerender() {
+    renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
+}
+
+// ===== Theme toggle =====
 function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeToggle(savedTheme);
-    
+
     document.getElementById('theme-toggle').addEventListener('click', () => {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -702,7 +277,7 @@ function updateThemeToggle(theme) {
     const toggle = document.getElementById('theme-toggle');
     const span = toggle.querySelector('span:first-child');
     const icon = toggle.querySelector('.theme-toggle-icon');
-    
+
     if (theme === 'dark') {
         span.textContent = 'Dark Mode';
         icon.textContent = '🌙';
@@ -712,28 +287,21 @@ function updateThemeToggle(theme) {
     }
 }
 
-// Mobile filter toggle
+// ===== Mobile filter toggle =====
 function initMobileFilters() {
     const toggle = document.getElementById('mobile-filter-toggle');
     const sidebar = document.querySelector('.sidebar');
-    
-    if (!toggle || !sidebar) {
-        console.error('Mobile filter elements not found');
-        return;
-    }
-    
-    // Start collapsed on mobile
+    if (!toggle || !sidebar) return;
+
     if (window.innerWidth <= 768) {
         sidebar.classList.add('collapsed');
     }
-    
+
     toggle.addEventListener('click', (e) => {
         e.preventDefault();
         sidebar.classList.toggle('collapsed');
-        console.log('Filter toggled, collapsed:', sidebar.classList.contains('collapsed'));
     });
-    
-    // Handle window resize
+
     window.addEventListener('resize', () => {
         if (window.innerWidth > 768) {
             sidebar.classList.remove('collapsed');
@@ -741,54 +309,54 @@ function initMobileFilters() {
     });
 }
 
+// ===== Init =====
 async function init() {
     initTheme();
     initMobileFilters();
-    
+
     currentNews = await fetchNews();
-    
-    // Populate source filter dropdown
-    const sources = ['all', ...new Set(currentNews.map(item => item.source))];
+
+    // Populate source filter dropdown (sorted alphabetically)
+    const sources = [...new Set(currentNews.map(item => item.source))].sort((a, b) => a.localeCompare(b));
     const sourceSelect = document.getElementById('source-filter');
-    sourceSelect.innerHTML = sources.map(source => 
+    sourceSelect.innerHTML = ['all', ...sources].map(source =>
         `<option value="${source}">${source === 'all' ? 'All Sources' : source}</option>`
     ).join('');
-    
-    renderNews(currentNews);
-    
-    // Setup category filter buttons
+
+    rerender();
+
+    // Category filter buttons
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentCategoryFilter = btn.dataset.category;
-            renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
+            rerender();
         });
     });
-    
-    // Setup source filter dropdown
+
+    // Source filter dropdown
     sourceSelect.addEventListener('change', (e) => {
         currentSourceFilter = e.target.value;
-        renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
+        rerender();
     });
-    
-    // Setup date filter dropdown
+
+    // Date filter dropdown
     document.getElementById('date-filter').addEventListener('change', (e) => {
         currentDateFilter = parseInt(e.target.value);
-        renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
+        rerender();
     });
-    
-    // Setup search input
-    const searchInput = document.getElementById('search-input');
-    searchInput.addEventListener('input', (e) => {
+
+    // Search input
+    document.getElementById('search-input').addEventListener('input', (e) => {
         currentSearchQuery = e.target.value.toLowerCase();
-        renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
+        rerender();
     });
-    
-    // Setup sort dropdown
+
+    // Sort dropdown
     document.getElementById('sort-filter').addEventListener('change', (e) => {
         currentSort = e.target.value;
-        renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
+        rerender();
     });
 }
 
