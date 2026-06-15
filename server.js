@@ -4,7 +4,13 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const parser = new Parser();
+const parser = new Parser({
+    headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/rss+xml, application/xml, text/xml, application/atom+xml, */*'
+    },
+    timeout: 10000
+});
 
 // Enable CORS for all origins
 app.use(cors({
