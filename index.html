@@ -27,9 +27,12 @@
                 <h3>Category</h3>
                 <div class="filter-buttons">
                     <button class="filter-btn active" data-category="all">All</button>
+                    <button class="filter-btn" data-category="core">Core Dev</button>
                     <button class="filter-btn" data-category="dotnet">.NET</button>
                     <button class="filter-btn" data-category="ai">AI</button>
-                    <button class="filter-btn" data-category="dev">Development</button>
+                    <button class="filter-btn" data-category="engineering">Engineering</button>
+                    <button class="filter-btn" data-category="releases">Releases</button>
+                    <button class="filter-btn" data-category="community">Community</button>
                 </div>
             </div>
             
@@ -55,7 +58,8 @@
             <div class="filter-section">
                 <h3>Sort By</h3>
                 <select id="sort-filter" class="source-select">
-                    <option value="date-desc" selected>Newest First</option>
+                    <option value="recommended" selected>Recommended</option>
+                    <option value="date-desc">Newest First</option>
                     <option value="date-asc">Oldest First</option>
                     <option value="source">By Source</option>
                     <option value="title">By Title</option>
