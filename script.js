@@ -22,14 +22,12 @@ const NEWS_SOURCES = [
     { name: 'InfoQ',                  url: rss('https://feed.infoq.com/'),                        format: 'rss', category: 'core', weight: 90 },
     { name: 'The Pragmatic Engineer', url: rss('https://blog.pragmaticengineer.com/rss/'),        format: 'rss', category: 'core', weight: 95 },
     { name: 'ByteByteGo',             url: rss('https://blog.bytebytego.com/feed'),               format: 'rss', category: 'core', weight: 90 },
-    { name: 'High Scalability',       url: rss('http://highscalability.com/rss.xml'),             format: 'rss', category: 'core', weight: 82 },
     { name: 'Xe Iaso',                url: rss('https://xeiaso.net/blog.rss'),                    format: 'rss', category: 'core', weight: 82 },
     { name: 'Increment Magazine',     url: rss('https://increment.com/feed.xml'),                 format: 'rss', category: 'core', weight: 78 },
 
     // ===== .NET =====
     { name: 'Microsoft .NET Blog',    url: rss('https://devblogs.microsoft.com/dotnet/feed/'),    format: 'rss', category: 'dotnet', weight: 100 },
     { name: 'Microsoft DevBlogs',     url: rss('https://devblogs.microsoft.com/feed/'),           format: 'rss', category: 'dotnet', weight: 85 },
-    { name: '.NET Foundation',        url: rss('https://dotnetfoundation.org/blog/rss.xml'),      format: 'rss', category: 'dotnet', weight: 82 },
     { name: 'Scott Hanselman',        url: rss('https://www.hanselman.com/blog/feed/rss'),        format: 'rss', category: 'dotnet', weight: 90 },
     { name: 'Andrew Lock',            url: rss('https://andrewlock.net/rss.xml'),                 format: 'rss', category: 'dotnet', weight: 95 },
     { name: 'Nick Chapsas',           url: rss('https://nickchapsas.com/rss'),                    format: 'rss', category: 'dotnet', weight: 90 },
@@ -40,27 +38,23 @@ const NEWS_SOURCES = [
     { name: 'JetBrains .NET Blog',    url: rss('https://blog.jetbrains.com/dotnet/feed/'),        format: 'rss', category: 'dotnet', weight: 85 },
 
     // ===== AI =====
-    { name: 'OpenAI Blog',            url: rss('https://openai.com/blog/rss/'),                   format: 'rss', category: 'ai', weight: 100 },
-    { name: 'Anthropic News',         url: rss('https://www.anthropic.com/news/rss'),             format: 'rss', category: 'ai', weight: 100 },
+    { name: 'Anthropic News',         url: rss('https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_news.xml'), format: 'rss', category: 'ai', weight: 100 },
     { name: 'Google AI Blog',         url: rss('https://blog.google/technology/ai/rss/'),         format: 'rss', category: 'ai', weight: 90 },
     { name: 'Hugging Face Blog',      url: rss('https://huggingface.co/blog/feed.xml'),           format: 'rss', category: 'ai', weight: 85 },
-    { name: 'The Batch',              url: rss('https://www.deeplearning.ai/the-batch/feed/'),    format: 'rss', category: 'ai', weight: 88 },
     { name: 'Simon Willison',         url: rss('https://simonwillison.net/atom/everything/'),     format: 'rss', category: 'ai', weight: 95 },
-    { name: 'Simon Willison Links',   url: rss('https://simonwillison.net/links/rss/'),           format: 'rss', category: 'ai', weight: 88 },
+    { name: 'Simon Willison Links',   url: rss('https://simonwillison.net/atom/links/'),          format: 'rss', category: 'ai', weight: 88 },
     { name: 'Ahead of AI',            url: rss('https://magazine.sebastianraschka.com/feed'),     format: 'rss', category: 'ai', weight: 90 },
     { name: 'MIT Tech Review AI',     url: rss('https://www.technologyreview.com/topic/artificial-intelligence/feed'), format: 'rss', category: 'ai', weight: 82 },
     { name: 'TLDR AI',                url: rss('https://tldr.tech/api/rss/ai/'),                  format: 'rss', category: 'ai', weight: 80 },
 
     // ===== ENGINEERING =====
+    { name: 'Anthropic Engineering',  url: rss('https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_engineering.xml'), format: 'rss', category: 'engineering', weight: 92 },
     { name: 'Cloudflare Blog',        url: rss('https://blog.cloudflare.com/rss/'),               format: 'rss', category: 'engineering', weight: 90 },
     { name: 'GitHub Engineering',     url: rss('https://github.blog/engineering/feed/'),          format: 'rss', category: 'engineering', weight: 88 },
-    { name: 'Netflix Tech Blog',      url: rss('https://netflixtechblog.com/feed'),               format: 'rss', category: 'engineering', weight: 88 },
 
     // ===== RELEASES =====
     { name: '.NET Runtime Releases',  url: rss('https://github.com/dotnet/runtime/releases.atom', 20),          format: 'rss', category: 'releases', weight: 92 },
     { name: 'ASP.NET Core Releases',  url: rss('https://github.com/dotnet/aspnetcore/releases.atom', 20),       format: 'rss', category: 'releases', weight: 92 },
-    { name: 'Semantic Kernel Releases', url: rss('https://github.com/microsoft/semantic-kernel/releases.atom', 20), format: 'rss', category: 'releases', weight: 85 },
-    { name: 'Ollama Releases',        url: rss('https://github.com/ollama/ollama/releases.atom', 20),           format: 'rss', category: 'releases', weight: 85 },
 
     // ===== COMMUNITY =====
     // Reddit routed through the RSS proxy to avoid browser CORS issues
@@ -129,6 +123,73 @@ function parseItems(data, source) {
         }));
 }
 
+// =====================================================
+// DEDUPLICATION
+// Two-pass approach:
+//   Pass 1 — exact URL match (canonical + trailing-slash normalised)
+//   Pass 2 — fuzzy title match via Jaccard word overlap
+//
+// When a duplicate is found, we keep whichever item has the higher
+// source weight so the best attribution wins (e.g. original blog
+// beats a TLDR summary of the same article).
+// =====================================================
+function normalizeUrl(url) {
+    return (url || '').trim().toLowerCase().replace(/\/$/, '');
+}
+
+function normalizeTitle(title) {
+    return (title || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+// Jaccard similarity on word sets — order-agnostic, handles
+// "OpenAI releases GPT-5" vs "GPT-5 released by OpenAI" well.
+function titleSimilarity(a, b) {
+    const wordsA = new Set(normalizeTitle(a).split(' ').filter(w => w.length > 2));
+    const wordsB = new Set(normalizeTitle(b).split(' ').filter(w => w.length > 2));
+    if (wordsA.size === 0 || wordsB.size === 0) return 0;
+    const intersection = [...wordsA].filter(w => wordsB.has(w)).length;
+    const union = new Set([...wordsA, ...wordsB]).size;
+    return intersection / union;
+}
+
+// Merge b into a, keeping the highest-weight source attribution.
+// If weights are equal, keep whichever was seen first (a).
+function mergeItems(a, b) {
+    return b.weight > a.weight ? { ...b, _dupeOf: a.source } : { ...a, _dupeOf: b.source };
+}
+
+function deduplicateNews(items, similarityThreshold = 0.75) {
+    // --- Pass 1: exact URL dedup ---
+    const byUrl = new Map();
+    for (const item of items) {
+        const key = normalizeUrl(item.link);
+        if (!key) continue;
+        if (byUrl.has(key)) {
+            byUrl.set(key, mergeItems(byUrl.get(key), item));
+        } else {
+            byUrl.set(key, item);
+        }
+    }
+    const urlDeduped = [...byUrl.values()];
+
+    // --- Pass 2: fuzzy title dedup ---
+    // O(n²) but fine at typical aggregator scale (~500-800 items).
+    const result = [];
+    for (const item of urlDeduped) {
+        const dupeIndex = result.findIndex(existing =>
+            titleSimilarity(item.title, existing.title) >= similarityThreshold);
+        if (dupeIndex === -1) {
+            result.push(item);
+        } else {
+            result[dupeIndex] = mergeItems(result[dupeIndex], item);
+        }
+    }
+
+    const removed = items.length - result.length;
+    if (removed > 0) console.log(`🔁 Deduplication removed ${removed} items (${items.length} → ${result.length})`);
+    return result;
+}
+
 // Recommended ranking: editorial weight blended with recency decay.
 // Fresh items get up to +40; the bonus halves roughly every ~33h.
 function rankScore(item) {
@@ -160,24 +221,28 @@ async function fetchNews() {
 
     header.classList.remove('loading');
 
-    // Default ordering: recommended (weight + recency)
-    return results.flat().sort((a, b) => rankScore(b) - rankScore(a));
+    // Collapse duplicates across sources, then rank
+    const deduped = deduplicateNews(results.flat());
+    return deduped.sort((a, b) => rankScore(b) - rankScore(a));
 }
 
 // Render news cards
-function renderNews(newsItems, categoryFilter = 'all', sourceFilter = 'all', daysBack = 7, searchQuery = '', sortBy = 'recommended') {
+function renderNews(newsItems, categories = new Set(), sourceFilter = 'all', daysBack = 7, searchQuery = '', sortBy = 'recommended') {
     const container = document.getElementById('news-container');
 
     let filtered = newsItems;
 
-    // Date filter
+    // Date filter — floor cutoff to start-of-day so "Last N days" is
+    // calendar-based. Otherwise a midnight-timestamped item (common in
+    // many feeds) drops out of the window partway through the day.
     const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - daysBack);
+    cutoffDate.setHours(0, 0, 0, 0);
+    cutoffDate.setDate(cutoffDate.getDate() - (daysBack - 1));
     filtered = filtered.filter(item => item.date >= cutoffDate);
 
-    // Category filter
-    if (categoryFilter !== 'all') {
-        filtered = filtered.filter(item => item.category === categoryFilter);
+    // Category filter (multi-select: empty set = show all)
+    if (categories.size > 0) {
+        filtered = filtered.filter(item => categories.has(item.category));
     }
 
     // Source filter
@@ -221,16 +286,15 @@ function renderNews(newsItems, categoryFilter = 'all', sourceFilter = 'all', day
     }
 
     container.innerHTML = filtered.map(item => `
-        <div class="news-card">
+        <a class="news-card" href="${item.link}" target="_blank" rel="noopener noreferrer">
             <span class="category ${item.category}">${CATEGORY_LABELS[item.category] || item.category}</span>
             <h3>${item.title}</h3>
-            <p>${item.description ? item.description.substring(0, 150) + '...' : ''}</p>
-            <div class="meta">
-                <span>${item.source}</span>
+            <p>${item.description ? item.description.substring(0, 120) : ''}</p>
+            <span class="meta">
+                <span>${item.source}${item._dupeOf ? ` <span class="dupe-badge" title="Also from: ${item._dupeOf}">+1</span>` : ''}</span>
                 <span>${formatDate(item.date)}</span>
-            </div>
-            <a href="${item.link}" target="_blank" rel="noopener noreferrer">Read more</a>
-        </div>
+            </span>
+        </a>
     `).join('');
 }
 
@@ -248,14 +312,14 @@ function formatDate(date) {
 
 // ===== App state =====
 let currentNews = [];
-let currentCategoryFilter = 'all';
+let currentCategories = new Set(); // empty = all
 let currentSourceFilter = 'all';
 let currentDateFilter = 7; // days
 let currentSearchQuery = '';
 let currentSort = 'recommended';
 
 function rerender() {
-    renderNews(currentNews, currentCategoryFilter, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
+    renderNews(currentNews, currentCategories, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
 }
 
 // ===== Theme toggle =====
@@ -325,12 +389,34 @@ async function init() {
 
     rerender();
 
-    // Category filter buttons
+    // Category filter buttons (multi-select)
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentCategoryFilter = btn.dataset.category;
+            const category = btn.dataset.category;
+            
+            if (category === 'all') {
+                // Clear all selections
+                currentCategories.clear();
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            } else {
+                // Toggle this category
+                document.querySelector('.filter-btn[data-category="all"]').classList.remove('active');
+                
+                if (currentCategories.has(category)) {
+                    currentCategories.delete(category);
+                    btn.classList.remove('active');
+                } else {
+                    currentCategories.add(category);
+                    btn.classList.add('active');
+                }
+                
+                // If nothing selected, revert to "All"
+                if (currentCategories.size === 0) {
+                    document.querySelector('.filter-btn[data-category="all"]').classList.add('active');
+                }
+            }
+            
             rerender();
         });
     });
