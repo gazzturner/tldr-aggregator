@@ -227,7 +227,7 @@ async function fetchNews() {
 }
 
 // Render news cards
-function renderNews(newsItems, categories = new Set(), sourceFilter = 'all', daysBack = 7, searchQuery = '', sortBy = 'recommended') {
+function renderNews(newsItems, categories = new Set(), sourceFilter = 'all', daysBack = 7, searchQuery = '', sortBy = 'recommended', readFilter = 'all') {
     const container = document.getElementById('news-container');
 
     let filtered = newsItems;
@@ -258,6 +258,13 @@ function renderNews(newsItems, categories = new Set(), sourceFilter = 'all', day
         );
     }
 
+    // Read/unread filter
+    if (readFilter === 'unread') {
+        filtered = filtered.filter(item => !isRead(item.link));
+    } else if (readFilter === 'read') {
+        filtered = filtered.filter(item => isRead(item.link));
+    }
+
     // Sorting
     switch (sortBy) {
         case 'recommended':
@@ -286,13 +293,16 @@ function renderNews(newsItems, categories = new Set(), sourceFilter = 'all', day
     }
 
     container.innerHTML = filtered.map(item => `
-        <a class="news-card" href="${item.link}" target="_blank" rel="noopener noreferrer">
+        <a class="news-card${isRead(item.link) ? ' read' : ''}" href="${item.link}" target="_blank" rel="noopener noreferrer" data-link="${item.link}">
             <span class="category ${item.category}">${CATEGORY_LABELS[item.category] || item.category}</span>
             <h3>${item.title}</h3>
             <p>${item.description ? item.description.substring(0, 120) : ''}</p>
             <span class="meta">
                 <span>${item.source}${item._dupeOf ? ` <span class="dupe-badge" title="Also from: ${item._dupeOf}">+1</span>` : ''}</span>
                 <span>${formatDate(item.date)}</span>
+                <button class="read-toggle-btn" data-link="${item.link}" title="${isRead(item.link) ? 'Mark as unread' : 'Mark as read'}">
+                    ${isRead(item.link) ? '☑' : '☐'}
+                </button>
             </span>
         </a>
     `).join('');
@@ -310,6 +320,23 @@ function formatDate(date) {
     return `${Math.floor(diff / 604800)}w ago`;
 }
 
+// ===== Read state (localStorage) =====
+let readArticles = new Set(JSON.parse(localStorage.getItem('readArticles') || '[]'));
+
+function markRead(link) {
+    readArticles.add(link);
+    localStorage.setItem('readArticles', JSON.stringify([...readArticles]));
+}
+
+function markUnread(link) {
+    readArticles.delete(link);
+    localStorage.setItem('readArticles', JSON.stringify([...readArticles]));
+}
+
+function isRead(link) {
+    return readArticles.has(link);
+}
+
 // ===== App state =====
 let currentNews = [];
 let currentCategories = new Set(); // empty = all
@@ -317,9 +344,10 @@ let currentSourceFilter = 'all';
 let currentDateFilter = 7; // days
 let currentSearchQuery = '';
 let currentSort = 'recommended';
+let currentReadFilter = 'all'; // 'all' | 'unread' | 'read'
 
 function rerender() {
-    renderNews(currentNews, currentCategories, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort);
+    renderNews(currentNews, currentCategories, currentSourceFilter, currentDateFilter, currentSearchQuery, currentSort, currentReadFilter);
 }
 
 // ===== Theme toggle =====
@@ -389,6 +417,35 @@ async function init() {
 
     rerender();
 
+    // Mark articles as read on click, handle read toggle button
+    const container = document.getElementById('news-container');
+    container.addEventListener('click', (e) => {
+        // Handle read toggle button click
+        const toggleBtn = e.target.closest('.read-toggle-btn');
+        if (toggleBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const link = toggleBtn.dataset.link;
+            if (isRead(link)) {
+                markUnread(link);
+            } else {
+                markRead(link);
+            }
+            rerender();
+            return;
+        }
+
+        // Auto-mark as read on card click
+        const card = e.target.closest('.news-card');
+        if (card) {
+            const link = card.dataset.link;
+            if (link && !isRead(link)) {
+                markRead(link);
+                card.classList.add('read');
+            }
+        }
+    });
+
     // Category filter buttons (multi-select)
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -442,6 +499,12 @@ async function init() {
     // Sort dropdown
     document.getElementById('sort-filter').addEventListener('change', (e) => {
         currentSort = e.target.value;
+        rerender();
+    });
+
+    // Read filter dropdown
+    document.getElementById('read-filter').addEventListener('change', (e) => {
+        currentReadFilter = e.target.value;
         rerender();
     });
 }
