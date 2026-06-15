@@ -198,32 +198,69 @@ function rankScore(item) {
     return (item.weight ?? 50) + recencyBonus;
 }
 
-// Fetch news from all sources (in parallel)
+// Fetch a single source, returning { items, source, ok }
+async function fetchSource(source) {
+    try {
+        const response = await fetch(source.url);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const data = await response.json();
+        const items = parseItems(data, source);
+        console.log(`✓ ${items.length} items from ${source.name}`);
+        return { items, source, ok: true };
+    } catch (error) {
+        console.error(`✗ Error fetching from ${source.name}:`, error.message);
+        return { items: [], source, ok: false };
+    }
+}
+
+// Fetch news from all sources (in parallel), with a retry pass for failures
 async function fetchNews() {
     const header = document.querySelector('header');
     header.classList.add('loading');
 
-    const results = await Promise.all(NEWS_SOURCES.map(async (source) => {
-        try {
-            const response = await fetch(source.url);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            const data = await response.json();
-            const items = parseItems(data, source);
-            console.log(`✓ ${items.length} items from ${source.name}`);
-            return items;
-        } catch (error) {
-            console.error(`✗ Error fetching from ${source.name}:`, error.message);
-            return [];
-        }
-    }));
+    const results = await Promise.all(NEWS_SOURCES.map(fetchSource));
+
+    const allItems = results.filter(r => r.ok).flatMap(r => r.items);
+    const failedSources = results.filter(r => !r.ok).map(r => r.source);
+
+    // Show what we have so far while retrying
+    if (failedSources.length > 0 && allItems.length > 0) {
+        const deduped = deduplicateNews(allItems);
+        deduped.sort((a, b) => rankScore(b) - rankScore(a));
+        header.classList.remove('loading');
+        // Return initial results, then kick off retry in background
+        scheduleRetry(failedSources, deduped);
+        return deduped;
+    }
 
     header.classList.remove('loading');
+    const deduped = deduplicateNews(allItems);
+    deduped.sort((a, b) => rankScore(b) - rankScore(a));
+    return deduped;
+}
 
-    // Collapse duplicates across sources, then rank
-    const deduped = deduplicateNews(results.flat());
-    return deduped.sort((a, b) => rankScore(b) - rankScore(a));
+// Retry failed sources after a delay, merge results into current news
+function scheduleRetry(failedSources, existingItems) {
+    console.log(`⏳ Retrying ${failedSources.length} failed sources in 3s...`);
+    setTimeout(async () => {
+        const retryResults = await Promise.all(failedSources.map(fetchSource));
+        const retryItems = retryResults.filter(r => r.ok).flatMap(r => r.items);
+        const stillFailed = retryResults.filter(r => !r.ok).map(r => r.source);
+
+        if (stillFailed.length > 0) {
+            console.warn(`✗ ${stillFailed.length} sources still failing: ${stillFailed.map(s => s.name).join(', ')}`);
+        }
+
+        if (retryItems.length > 0) {
+            console.log(`✓ Retry recovered ${retryItems.length} items`);
+            const merged = deduplicateNews([...existingItems, ...retryItems]);
+            merged.sort((a, b) => rankScore(b) - rankScore(a));
+            currentNews = merged;
+            rerender();
+        }
+    }, 3000);
 }
 
 // Render news cards
