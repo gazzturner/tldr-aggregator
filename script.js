@@ -284,6 +284,191 @@ const NEWS_SOURCES = [
             category: categorizeContent(item.title + ' ' + item.description)
         }))
     },
+    
+    // Engineering Blogs
+    {
+        name: 'Netflix Tech Blog',
+        url: `${API_BASE_URL}/api/rss?url=https://netflixtechblog.com/feed&limit=50`,
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Netflix Tech Blog',
+            date: new Date(item.pubDate),
+            category: 'dev'
+        }))
+    },
+    
+    {
+        name: 'Cloudflare Blog',
+        url: `${API_BASE_URL}/api/rss?url=https://blog.cloudflare.com/rss/&limit=50`,
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Cloudflare Blog',
+            date: new Date(item.pubDate),
+            category: categorizeContent(item.title + ' ' + item.description)
+        }))
+    },
+    
+    {
+        name: 'GitHub Engineering',
+        url: `${API_BASE_URL}/api/rss?url=https://github.blog/engineering/feed/&limit=50`,
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'GitHub Engineering',
+            date: new Date(item.pubDate),
+            category: 'dev'
+        }))
+    },
+    
+    {
+        name: 'Uber Engineering',
+        url: `${API_BASE_URL}/api/rss?url=https://www.uber.com/blog/rss/&limit=50`,
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Uber Engineering',
+            date: new Date(item.pubDate),
+            category: 'dev'
+        }))
+    },
+    
+    {
+        name: 'InfoQ',
+        url: `${API_BASE_URL}/api/rss?url=https://feed.infoq.com/&limit=50`,
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'InfoQ',
+            date: new Date(item.pubDate),
+            category: categorizeContent(item.title + ' ' + item.description)
+        }))
+    },
+    
+    {
+        name: 'The Pragmatic Engineer',
+        url: `${API_BASE_URL}/api/rss?url=https://blog.pragmaticengineer.com/rss/&limit=50`,
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'The Pragmatic Engineer',
+            date: new Date(item.pubDate),
+            category: 'dev'
+        }))
+    },
+    
+    {
+        name: 'Hacker Noon',
+        url: `${API_BASE_URL}/api/rss?url=https://hackernoon.com/feed&limit=50`,
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Hacker Noon',
+            date: new Date(item.pubDate),
+            category: categorizeContent(item.title + ' ' + item.description)
+        }))
+    },
+    
+    {
+        name: 'SitePoint',
+        url: `${API_BASE_URL}/api/rss?url=https://www.sitepoint.com/feed/&limit=50`,
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'SitePoint',
+            date: new Date(item.pubDate),
+            category: 'dev'
+        }))
+    },
+    
+    // AI Sources
+    {
+        name: 'Google AI Blog',
+        url: `${API_BASE_URL}/api/rss?url=https://blog.google/technology/ai/rss/&limit=50`,
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Google AI Blog',
+            date: new Date(item.pubDate),
+            category: 'ai'
+        }))
+    },
+    
+    {
+        name: 'MIT Tech Review (AI)',
+        url: `${API_BASE_URL}/api/rss?url=https://www.technologyreview.com/topic/artificial-intelligence/feed&limit=50`,
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'MIT Tech Review',
+            date: new Date(item.pubDate),
+            category: 'ai'
+        }))
+    },
+    
+    // .NET / Microsoft Sources
+    {
+        name: 'Microsoft DevBlogs',
+        url: `${API_BASE_URL}/api/rss?url=https://devblogs.microsoft.com/feed/&limit=50`,
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Microsoft DevBlogs',
+            date: new Date(item.pubDate),
+            category: categorizeContent(item.title + ' ' + item.description)
+        }))
+    },
+    
+    {
+        name: 'JetBrains .NET Blog',
+        url: `${API_BASE_URL}/api/rss?url=https://blog.jetbrains.com/dotnet/feed/&limit=50`,
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'JetBrains .NET',
+            date: new Date(item.pubDate),
+            category: 'dotnet'
+        }))
+    },
+    
+    {
+        name: 'Code Maze',
+        url: `${API_BASE_URL}/api/rss?url=https://code-maze.com/feed/&limit=50`,
+        type: 'rss',
+        parser: (data) => data.items.map(item => ({
+            title: item.title,
+            description: item.description.replace(/<[^>]*>/g, '').substring(0, 200),
+            link: item.link,
+            source: 'Code Maze',
+            date: new Date(item.pubDate),
+            category: 'dotnet'
+        }))
+    },
     {
         name: 'TLDR AI',
         url: 'https://api.rss2json.com/v1/api.json?rss_url=https://tldr.tech/api/rss/ai/',
